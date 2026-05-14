@@ -1,0 +1,343 @@
+<!-- google-login.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Google TV Login</title>
+
+  <script type="module">
+    import {
+      initializeApp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    import {
+      getFirestore,
+      doc,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // FIREBASE CONFIG
+    // const firebaseConfig = {
+    //   apiKey: "YOUR_API_KEY",
+    //   authDomain:
+    //     "YOUR_PROJECT.firebaseapp.com",
+    //   projectId: "YOUR_PROJECT_ID",
+    //   storageBucket:
+    //     "YOUR_PROJECT.appspot.com",
+    //   messagingSenderId: "XXXX",
+    //   appId: "XXXX"
+    // };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBTxODMVAnc16i0KJfUYVJvtuSEeeEowlM",
+      authDomain: "rn-tvos-app.firebaseapp.com",
+      databaseURL: "https://rn-tvos-app-default-rtdb.firebaseio.com",
+      projectId: "rn-tvos-app",
+      storageBucket: "rn-tvos-app.firebasestorage.app",
+      messagingSenderId: "676763657931",
+      appId: "1:676763657931:web:03123b23f6cfce63191d4e",
+      measurementId: "G-HE85JCL74J"
+    };
+
+    const app =
+      initializeApp(firebaseConfig);
+
+    const auth = getAuth(app);
+
+    const db = getFirestore(app);
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const code =
+      params.get("code");
+
+    async function login() {
+      try {
+        document.getElementById(
+          "status"
+        ).innerText =
+          "Opening Google Login...";
+
+        const provider =
+          new GoogleAuthProvider();
+
+        const result =
+          await signInWithPopup(
+            auth,
+            provider
+          );
+
+        const user =
+          result.user;
+
+        await updateDoc(
+          doc(
+            db,
+            "tvSessions",
+            code
+          ),
+          {
+            status: "success",
+            uid: user.uid,
+            email: user.email,
+            provider: "google",
+          }
+        );
+
+        document.body.innerHTML = `
+          <div class="success-card">
+            <div class="success-icon">
+              ✓
+            </div>
+
+            <h1>
+              Login Successful
+            </h1>
+
+            <p>
+              Your TV has been connected successfully using Google account.
+            </p>
+
+            <div class="email">
+              ${user.email}
+            </div>
+
+            <span>
+              You can now return to your TV.
+            </span>
+          </div>
+        `;
+      } catch (e) {
+        console.log(e);
+
+        document.getElementById(
+          "status"
+        ).innerText =
+          e.message;
+      }
+    }
+
+    window.login = login;
+  </script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family:
+        Arial,
+        sans-serif;
+    }
+
+    body {
+      background:
+        linear-gradient(
+          135deg,
+          #0f172a,
+          #111827,
+          #000
+        );
+
+      color: white;
+
+      min-height: 100vh;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 430px;
+
+      background:
+        rgba(17, 24, 39, 0.95);
+
+      border-radius: 28px;
+
+      padding: 45px 35px;
+
+      text-align: center;
+
+      border: 1px solid
+        rgba(255,255,255,0.08);
+
+      backdrop-filter: blur(10px);
+
+      box-shadow:
+        0 15px 40px
+        rgba(0,0,0,0.45);
+    }
+
+    .logo {
+      width: 90px;
+      height: 90px;
+
+      border-radius: 50%;
+
+      background: white;
+
+      margin: 0 auto 25px;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      font-size: 42px;
+
+      font-weight: bold;
+
+      color: #4285F4;
+    }
+
+    h1 {
+      font-size: 32px;
+
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #b3b3b3;
+
+      line-height: 28px;
+
+      margin-bottom: 35px;
+    }
+
+    .btn {
+      width: 100%;
+
+      height: 62px;
+
+      border: none;
+
+      border-radius: 16px;
+
+      background: #4285F4;
+
+      color: white;
+
+      font-size: 20px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      transform: scale(1.03);
+    }
+
+    .status {
+      margin-top: 25px;
+
+      color: #aaa;
+
+      font-size: 15px;
+    }
+
+    .success-card {
+      width: 100%;
+      max-width: 450px;
+
+      background:
+        rgba(17, 24, 39, 0.96);
+
+      border-radius: 30px;
+
+      padding: 50px 35px;
+
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 90px;
+      height: 90px;
+
+      border-radius: 50%;
+
+      background: #16a34a;
+
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      font-size: 42px;
+
+      margin: 0 auto 25px;
+    }
+
+    .email {
+      margin-top: 18px;
+
+      margin-bottom: 20px;
+
+      color: #4285F4;
+
+      font-weight: bold;
+    }
+
+    span {
+      color: #999;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="logo">
+      G
+    </div>
+
+    <h1>
+      Continue with Google
+    </h1>
+
+    <p>
+      Sign in securely to connect your TV and continue streaming movies, shows and live content.
+    </p>
+
+    <button
+      class="btn"
+      onclick="login()"
+    >
+      Continue with Google
+    </button>
+
+    <div
+      class="status"
+      id="status"
+    >
+      Waiting for login...
+    </div>
+  </div>
+</body>
+</html>
